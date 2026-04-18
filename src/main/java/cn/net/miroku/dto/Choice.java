@@ -15,7 +15,7 @@ public class Choice {
     /**
      * 回答
      */
-    private Message[] message;
+    private Message message;
     /**
      * 结束原因
      */
