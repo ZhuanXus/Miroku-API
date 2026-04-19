@@ -19,9 +19,9 @@ public class ChatCompletionRequest {
     /**
      * 采样温度 越高越随机
      */
-    private double temperature;
+    private Double temperature;
     /**
      * 是否开启流式传输
      */
-    private boolean stream;
+    private Boolean stream;
 }

@@ -11,7 +11,7 @@ public class Choice {
     /**
      * 回答索引
      */
-    private int index;
+    private Integer index;
     /**
      * 回答
      */

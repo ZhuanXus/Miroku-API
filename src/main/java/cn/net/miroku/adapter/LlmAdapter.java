@@ -1,11 +1,15 @@
 package cn.net.miroku.adapter;
 
 import cn.net.miroku.dto.ChatCompletionRequest;
-import cn.net.miroku.dto.ChatCompletionResponse;
+import okhttp3.Response;
 
 import java.io.IOException;
 
 public interface LlmAdapter {
     boolean support(String model);
-    ChatCompletionResponse createChatCompletion(ChatCompletionRequest request) throws IOException;
+
+    /**
+     * 创建聊天补全
+     */
+    Response createChatCompletion(ChatCompletionRequest request) throws IOException;
 }

@@ -2,13 +2,9 @@ package cn.net.miroku.adapter;
 
 import cn.net.miroku.configuration.DeepseekModelConfigurationProperties;
 import cn.net.miroku.dto.ChatCompletionRequest;
-import cn.net.miroku.dto.ChatCompletionResponse;
 import cn.net.miroku.tool.JacksonObjectMapper;
 import lombok.RequiredArgsConstructor;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.*;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -30,26 +26,27 @@ public class DeepSeekAdapter implements LlmAdapter {
     }
 
     @Override
-    public ChatCompletionResponse createChatCompletion(ChatCompletionRequest chatCompletionRequest) throws IOException {
-        // deepseek 消息没有 develop 角色 替换为 system 角色
+    public Response createChatCompletion(ChatCompletionRequest chatCompletionRequest) throws IOException {
+        // deepseek 消息没有 develop, function 角色 替换为 system, tool 角色
         for (int i = 0; i < chatCompletionRequest.getMessages().length; i++) {
             if ("develop".equals(chatCompletionRequest.getMessages()[i].getRole())) {
                 chatCompletionRequest.getMessages()[i].setRole("system");
+            } else if ("function".equals(chatCompletionRequest.getMessages()[i].getRole())) {
+                chatCompletionRequest.getMessages()[i].setRole("tool");
             }
         }
 
         // 调用 deepseek
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(mediaType, jacksonObjectMapper.toJson(chatCompletionRequest));
+        RequestBody body = RequestBody.create(jacksonObjectMapper.toJson(chatCompletionRequest), mediaType);
         Request request = new Request.Builder()
                 .url(properties.getBaseUrl() + "/chat/completions")
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Accept", "application/json")
+                .addHeader("Accept", chatCompletionRequest.getStream() == true ? "text/event-stream" :"application/json")
                 .addHeader("Authorization", "Bearer " + properties.getApiKey())
                 .build();
 
-        String responseBody = okHttpClient.newCall(request).execute().body().string();
-        return jacksonObjectMapper.fromJson(responseBody, ChatCompletionResponse.class);
+        return okHttpClient.newCall(request).execute();
     }
 }

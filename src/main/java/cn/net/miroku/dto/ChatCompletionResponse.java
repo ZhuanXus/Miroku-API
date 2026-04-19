@@ -19,7 +19,7 @@ public class ChatCompletionResponse {
     /**
      * 响应创建时间
      */
-    private long created;
+    private Long created;
     /**
      * 使用的模型
      */
