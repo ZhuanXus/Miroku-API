@@ -1,5 +1,6 @@
 package cn.net.miroku.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,5 +20,6 @@ public class Choice {
     /**
      * 结束原因
      */
-    private String finish_reason;
+    @JsonProperty("finish_reason")
+    private String finishReason;
 }

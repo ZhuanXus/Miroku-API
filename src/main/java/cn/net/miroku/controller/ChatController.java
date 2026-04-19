@@ -2,7 +2,7 @@ package cn.net.miroku.controller;
 
 import cn.net.miroku.dto.ChatCompletionRequest;
 import cn.net.miroku.dto.ChatCompletionResponse;
-import cn.net.miroku.service.ChatCompletionService;
+import cn.net.miroku.service.impl.ChatCompletionServiceImpl;
 import cn.net.miroku.tool.JacksonObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.io.InputStream;
 @RestController
 @RequiredArgsConstructor
 public class ChatController {
-    private final ChatCompletionService chatCompletionService;
+    private final ChatCompletionServiceImpl chatCompletionService;
     /** 对象 <--> json */
     private final JacksonObjectMapper jacksonObjectMapper;
 

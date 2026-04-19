@@ -1,25 +1,15 @@
 package cn.net.miroku.service;
 
 import cn.net.miroku.dto.ChatCompletionRequest;
-import cn.net.miroku.adapter.LlmAdapter;
-import lombok.RequiredArgsConstructor;
 import okhttp3.Response;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class ChatCompletionService {
-    private final List<LlmAdapter> llmStrategies;
-
-    public Response createChatCompletion(ChatCompletionRequest request) throws IOException {
-        for (LlmAdapter strategy : llmStrategies) {
-            if (strategy.support(request.getModel())) {
-                return strategy.createChatCompletion(request);
-            }
-        }
-        return null;
-    }
+public interface ChatCompletionService {
+    /**
+     * 创建聊天补全
+     * @param request 请求参数
+     * @return okhttp响应
+     */
+    Response createChatCompletion(ChatCompletionRequest request) throws IOException;
 }
