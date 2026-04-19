@@ -19,5 +19,5 @@ public class Choice {
     /**
      * 结束原因
      */
-    private String finishReason;
+    private String finish_reason;
 }

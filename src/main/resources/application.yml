@@ -1,0 +1,12 @@
+spring:
+  application:
+    name:
+      Miroku-API
+
+# 多模型配置
+# apikey需要到 系统属性 -> 环境变量 -> 用户变量 来设置环境变量值
+models:
+  # deepseek 配置
+  deepseek:
+    base-url: https://api.deepseek.com/v1
+    api-key: ${DEEPSEEK_API_KEY:}

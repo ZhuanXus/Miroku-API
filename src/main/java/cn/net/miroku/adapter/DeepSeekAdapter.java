@@ -1,5 +1,6 @@
-package cn.net.miroku.strategy;
+package cn.net.miroku.adapter;
 
+import cn.net.miroku.configuration.DeepseekModelConfigurationProperties;
 import cn.net.miroku.dto.ChatCompletionRequest;
 import cn.net.miroku.dto.ChatCompletionResponse;
 import cn.net.miroku.tool.JacksonObjectMapper;
@@ -14,11 +15,13 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class DeepSeekStrategy implements LlmStrategy{
+public class DeepSeekAdapter implements LlmAdapter {
     /** 对象转json工具 */
     private final JacksonObjectMapper jacksonObjectMapper;
     /** http客户端 */
-    private final OkHttpClient client = new OkHttpClient().newBuilder().build();
+    private final OkHttpClient okHttpClient;
+    /** 配置 */
+    private final DeepseekModelConfigurationProperties properties;
 
     @Override
     public boolean support(String model) {
@@ -39,14 +42,14 @@ public class DeepSeekStrategy implements LlmStrategy{
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, jacksonObjectMapper.toJson(chatCompletionRequest));
         Request request = new Request.Builder()
-                .url("https://api.deepseek.com/chat/completions")
+                .url(properties.getBaseUrl() + "/chat/completions")
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
-                .addHeader("Authorization", "Bearer ")
+                .addHeader("Authorization", "Bearer " + properties.getApiKey())
                 .build();
 
-        String responseBody = client.newCall(request).execute().body().string();
+        String responseBody = okHttpClient.newCall(request).execute().body().string();
         return jacksonObjectMapper.fromJson(responseBody, ChatCompletionResponse.class);
     }
 }
