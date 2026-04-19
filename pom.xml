@@ -68,6 +68,14 @@
             <artifactId>okhttp</artifactId>
             <version>4.12.0</version> <!-- 推荐使用 4.x 稳定版，也可去 Maven Central 查看最新小版本 -->
         </dependency>
+
+        <!-- Sa-Token 鉴权框架-->
+        <!-- Sa-Token 权限认证，在线文档：https://sa-token.cc -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot4-starter</artifactId>
+            <version>1.45.0</version>
+        </dependency>
     </dependencies>
 
     <build>
