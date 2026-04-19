@@ -10,7 +10,5 @@ public class LoginController {
     public void login() {
         // 关注永雏塔菲谢谢喵
         StpUtil.login("Ace-Taffy-1883");
-        System.out.println(StpUtil.getPermissionList());
-        System.out.println(StpUtil.getRoleList());
     }
 }

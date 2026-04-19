@@ -23,4 +23,6 @@ public class StpInterfaceImpl implements StpInterface {
         list.add("user");
         return list;
     }
+
+
 }
