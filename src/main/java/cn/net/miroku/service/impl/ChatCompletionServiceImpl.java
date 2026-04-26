@@ -1,6 +1,6 @@
 package cn.net.miroku.service.impl;
 
-import cn.net.miroku.dto.ChatCompletionRequest;
+import cn.net.miroku.dto.chat.completion.Request;
 import cn.net.miroku.adapter.LlmAdapter;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Response;
@@ -14,7 +14,7 @@ import java.util.List;
 public class ChatCompletionServiceImpl implements cn.net.miroku.service.ChatCompletionService {
     private final List<LlmAdapter> llmStrategies;
 
-    public Response createChatCompletion(ChatCompletionRequest request) throws IOException {
+    public Response createChatCompletion(Request request) throws IOException {
         for (LlmAdapter strategy : llmStrategies) {
             if (strategy.support(request.getModel())) {
                 return strategy.createChatCompletion(request);

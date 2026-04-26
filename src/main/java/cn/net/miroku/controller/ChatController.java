@@ -1,12 +1,11 @@
 package cn.net.miroku.controller;
 
-import cn.net.miroku.dto.ChatCompletionRequest;
-import cn.net.miroku.dto.ChatCompletionResponse;
+import cn.net.miroku.dto.chat.completion.Request;
+import cn.net.miroku.dto.chat.completion.Response;
 import cn.net.miroku.service.impl.ChatCompletionServiceImpl;
 import cn.net.miroku.tool.JacksonObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import okhttp3.Response;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,9 +22,9 @@ public class ChatController {
     private final JacksonObjectMapper jacksonObjectMapper;
 
     @PostMapping("/v1/chat/completions")
-    public Object createChatCompletion(@RequestBody ChatCompletionRequest request, HttpServletResponse response) throws IOException {
+    public Object createChatCompletion(@RequestBody Request request, HttpServletResponse response) throws IOException {
         // 调用 LLM 获取响应
-        Response llmResponse = chatCompletionService.createChatCompletion(request);
+        okhttp3.Response llmResponse = chatCompletionService.createChatCompletion(request);
 
         // 设置响应码
         response.setStatus(llmResponse.code());
@@ -55,7 +54,7 @@ public class ChatController {
 
             try {
                 String json = llmResponse.body().string();
-                return jacksonObjectMapper.fromJson(json, ChatCompletionResponse.class);
+                return jacksonObjectMapper.fromJson(json, Response.class);
             } finally {
                 llmResponse.close(); // 释放链接
             }

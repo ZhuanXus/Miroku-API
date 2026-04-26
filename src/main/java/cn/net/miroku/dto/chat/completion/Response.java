@@ -1,19 +1,16 @@
-package cn.net.miroku.dto;
+package cn.net.miroku.dto.chat.completion;
 
-import lombok.AllArgsConstructor;
+import cn.net.miroku.dto.Choice;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ChatCompletionResponse {
+public class Response {
     /**
      * 聊天补全记录的唯一标识
      */
     private String id;
     /**
-     * 响应类型 chat.completion 非流式响应
+     * 类型
      */
     private String object;
     /**

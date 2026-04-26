@@ -1,13 +1,10 @@
-package cn.net.miroku.dto;
+package cn.net.miroku.dto.chat.completion;
 
-import lombok.AllArgsConstructor;
+import cn.net.miroku.dto.Message;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ChatCompletionRequest {
+public class Request {
     /**
      * 使用模型
      */

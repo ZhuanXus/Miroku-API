@@ -1,7 +1,7 @@
 package cn.net.miroku.adapter;
 
 import cn.net.miroku.configuration.DeepseekModelConfigurationProperties;
-import cn.net.miroku.dto.ChatCompletionRequest;
+import cn.net.miroku.dto.chat.completion.Request;
 import cn.net.miroku.tool.JacksonObjectMapper;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
@@ -26,7 +26,7 @@ public class DeepSeekAdapter implements LlmAdapter {
     }
 
     @Override
-    public Response createChatCompletion(ChatCompletionRequest chatCompletionRequest) throws IOException {
+    public Response createChatCompletion(Request chatCompletionRequest) throws IOException {
         // deepseek 消息没有 develop, function 角色 替换为 system, tool 角色
         for (int i = 0; i < chatCompletionRequest.getMessages().length; i++) {
             if ("develop".equals(chatCompletionRequest.getMessages()[i].getRole())) {
@@ -39,7 +39,7 @@ public class DeepSeekAdapter implements LlmAdapter {
         // 调用 deepseek
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(jacksonObjectMapper.toJson(chatCompletionRequest), mediaType);
-        Request request = new Request.Builder()
+        okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(properties.getBaseUrl() + "/chat/completions")
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
