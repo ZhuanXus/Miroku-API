@@ -5,11 +5,13 @@ import okhttp3.Response;
 
 import java.io.IOException;
 
-public interface LlmAdapter {
-    boolean support(String model);
+public abstract class LlmAdapter {
+
+
+    public abstract boolean support(String model);
 
     /**
      * 创建聊天补全
      */
-    Response createChatCompletion(Request request) throws IOException;
+    public abstract Response createChatCompletion(Request request) throws IOException;
 }

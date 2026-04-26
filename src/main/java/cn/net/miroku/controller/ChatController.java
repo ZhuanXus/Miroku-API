@@ -3,7 +3,7 @@ package cn.net.miroku.controller;
 import cn.net.miroku.dto.chat.completion.Request;
 import cn.net.miroku.dto.chat.completion.Response;
 import cn.net.miroku.service.impl.ChatCompletionServiceImpl;
-import cn.net.miroku.tool.JacksonObjectMapper;
+import cn.net.miroku.tool.JsonUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +18,6 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatCompletionServiceImpl chatCompletionService;
-    /** 对象 <--> json */
-    private final JacksonObjectMapper jacksonObjectMapper;
 
     @PostMapping("/v1/chat/completions")
     public Object createChatCompletion(@RequestBody Request request, HttpServletResponse response) throws IOException {
@@ -54,7 +52,7 @@ public class ChatController {
 
             try {
                 String json = llmResponse.body().string();
-                return jacksonObjectMapper.fromJson(json, Response.class);
+                return JsonUtils.toDto(json, Response.class);
             } finally {
                 llmResponse.close(); // 释放链接
             }

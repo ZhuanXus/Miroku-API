@@ -2,7 +2,7 @@ package cn.net.miroku.adapter;
 
 import cn.net.miroku.configuration.DeepseekModelConfigurationProperties;
 import cn.net.miroku.dto.chat.completion.Request;
-import cn.net.miroku.tool.JacksonObjectMapper;
+import cn.net.miroku.tool.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.springframework.stereotype.Component;
@@ -11,9 +11,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class DeepSeekAdapter implements LlmAdapter {
-    /** 对象转json工具 */
-    private final JacksonObjectMapper jacksonObjectMapper;
+public class DeepSeekAdapter extends LlmAdapter {
     /** http客户端 */
     private final OkHttpClient okHttpClient;
     /** 配置 */
@@ -27,18 +25,18 @@ public class DeepSeekAdapter implements LlmAdapter {
 
     @Override
     public Response createChatCompletion(Request chatCompletionRequest) throws IOException {
-        // deepseek 消息没有 develop, function 角色 替换为 system, tool 角色
-        for (int i = 0; i < chatCompletionRequest.getMessages().length; i++) {
-            if ("develop".equals(chatCompletionRequest.getMessages()[i].getRole())) {
-                chatCompletionRequest.getMessages()[i].setRole("system");
-            } else if ("function".equals(chatCompletionRequest.getMessages()[i].getRole())) {
-                chatCompletionRequest.getMessages()[i].setRole("tool");
+        // 遍历消息体，把 developer 角色替换为 system 角色 function 角色替换为 tool 角色
+        chatCompletionRequest.getMessages().forEach(message -> {
+            if ("developer".equals(message.getRole())) {
+                message.setRole("system");
+            } else if ("function".equals(message.getRole())) {
+                message.setRole("tool");
             }
-        }
+        });
 
-        // 调用 deepseek
+        // 组装请求体
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(jacksonObjectMapper.toJson(chatCompletionRequest), mediaType);
+        RequestBody body = RequestBody.create(JsonUtils.toJson(chatCompletionRequest), mediaType);
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(properties.getBaseUrl() + "/chat/completions")
                 .method("POST", body)
@@ -47,6 +45,7 @@ public class DeepSeekAdapter implements LlmAdapter {
                 .addHeader("Authorization", "Bearer " + properties.getApiKey())
                 .build();
 
+        // 发送请求给DeepSeek服务商 获取响应头
         return okHttpClient.newCall(request).execute();
     }
 }
