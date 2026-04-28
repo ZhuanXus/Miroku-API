@@ -3,7 +3,27 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.net.miroku.mapper.ResponseMapper">
-    <insert id="insert">
-        
+    <!-- 写入响应表 -->
+    <insert id="insertResponse" parameterType="cn.net.miroku.dto.chat.completion.Response">
+        INSERT INTO response(id, object, created, model)
+        VALUES (#{response.id},
+                #{response.object},
+                #{response.created},
+                #{response.model})
+    </insert>
+
+    <!-- 写入单条详细回复表 -->
+    <insert id="insertChoices" parameterType="cn.net.miroku.dto.chat.completion.Response">
+        INSERT INTO choices(response_id, index_, message_content, message_role, finish_reason)
+        VALUES
+        <foreach collection="response.choices" item="choice" separator=",">
+            (
+            #{response.id},
+            #{choice.index},
+            #{choice.message.content},
+            #{choice.message.role},
+            #{choice.finishReason}
+            )
+        </foreach>
     </insert>
 </mapper>

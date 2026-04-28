@@ -3,10 +3,11 @@ package cn.net.miroku.dto.chat.completion;
 import cn.net.miroku.dto.Choice;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class Response {
     /**
-     * 聊天补全记录的唯一标识
      */
     private String id;
     /**
@@ -24,5 +25,5 @@ public class Response {
     /**
      * 响应配置信息
      */
-    private Choice[] choices;
+    private List<Choice> choices;
 }

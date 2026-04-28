@@ -26,11 +26,21 @@ models:
   deepseek:
     base-url: https://api.deepseek.com/v1
     api-key: ${DEEPSEEK_API_KEY:}
+  # 豆包 配置
+  doubao:
+    base-url: https://ark.cn-beijing.volces.com/api/v3/
+    api-key: ${DOUBAO_API_KEY:}
   model-data-list:
     - id: deepseek-chat
       owned_by: deepseek
     - id: deepseek-reasoner
       owned_by: deepseek
+    - id: doubao-seed-2-0-mini-260215
+      owned_by: 火山引擎
+    - id: doubao-seed-2-0-pro-260215
+      owned_by: 火山引擎
+    - id: doubao-1-5-pro-32k-250115
+      owned_by: 火山引擎
 
 
 

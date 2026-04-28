@@ -8,8 +8,11 @@ import java.io.IOException;
 public interface ChatCompletionService {
     /**
      * 创建聊天补全
-     * @param request 请求参数
-     * @return okhttp响应
      */
     Response createChatCompletion(Request request) throws IOException;
+
+    /**
+     * 保存聊天补全
+     */
+    void saveChatCompletion(cn.net.miroku.dto.chat.completion.Response response);
 }

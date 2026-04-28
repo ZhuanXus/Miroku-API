@@ -5,7 +5,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/** 异步线程池配置 */
+/**
+ * 异步线程池配置
+ */
 @Configuration
 public class AsyncWebConfig implements WebMvcConfigurer {
 
