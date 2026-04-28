@@ -6,6 +6,7 @@ import cn.net.miroku.mapper.ResponseMapper;
 import cn.net.miroku.service.ModelService;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Response;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ public class ChatCompletionServiceImpl implements cn.net.miroku.service.ChatComp
     }
 
     @Override
+    @Async("dbSaveExecutor")
     @Transactional(rollbackFor = Exception.class)
     public void saveChatCompletion(cn.net.miroku.dto.chat.completion.Response response) {
         responseMapper.insertResponse(response);

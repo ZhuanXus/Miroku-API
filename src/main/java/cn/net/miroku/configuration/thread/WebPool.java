@@ -1,4 +1,4 @@
-package cn.net.miroku.configuration;
+package cn.net.miroku.configuration.thread;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -6,10 +6,10 @@ import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * 异步线程池配置
+ * Web 异步线程池
  */
 @Configuration
-public class AsyncWebConfig implements WebMvcConfigurer {
+public class WebPool implements WebMvcConfigurer {
 
     @Override
     public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
