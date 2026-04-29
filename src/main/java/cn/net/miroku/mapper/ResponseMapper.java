@@ -19,5 +19,5 @@ public interface ResponseMapper {
     /**
      * 查询某条补全
      */
-    MirokuResponse selectChoices(@Param("respId") String respId);
+    MirokuResponse selectResponse(@Param("respId") String respId);
 }

@@ -50,6 +50,6 @@ public class CompletionServiceImpl implements CompletionService {
 
     @Override
     public MirokuResponse select(String respId) {
-        return responseMapper.selectChoices(respId);
+        return responseMapper.selectResponse(respId);
     }
 }

@@ -26,7 +26,7 @@ public class CompletionController {
     private final CompletionServiceImpl chatCompletionService;
 
     @PostMapping
-    public Object createChatCompletion(@RequestBody MirokuRequest mirokuRequest, HttpServletResponse response) throws IOException {
+    public Object create(@RequestBody MirokuRequest mirokuRequest, HttpServletResponse response) throws IOException {
         // 调用 LLM 获取响应
         okhttp3.Response llmResponse = chatCompletionService.create(mirokuRequest);
 

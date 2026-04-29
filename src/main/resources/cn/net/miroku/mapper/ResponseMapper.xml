@@ -48,7 +48,7 @@
         </collection>
     </resultMap>
 
-    <select id="selectChoices" resultMap="ResponseMap">
+    <select id="selectResponse" resultMap="ResponseMap">
         SELECT r.id              AS `resp_id`,
                r.object          AS `resp_object`,
                r.created         AS `resp_created`,
