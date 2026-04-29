@@ -6,7 +6,7 @@ import okhttp3.Response;
 
 import java.io.IOException;
 
-public interface ChatCompletionService {
+public interface CompletionService {
     /**
      * 创建聊天补全
      */
@@ -15,7 +15,7 @@ public interface ChatCompletionService {
     /**
      * 保存聊天补全
      */
-    void saveChatCompletion(MirokuResponse mirokuResponse);
+    void save(MirokuResponse mirokuResponse);
 
     /**
      * 查询聊天补全

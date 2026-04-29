@@ -4,6 +4,7 @@ import cn.net.miroku.dto.chat.completion.MirokuResponse;
 import cn.net.miroku.dto.chat.completion.MirokuRequest;
 import cn.net.miroku.adapter.LlmAdapter;
 import cn.net.miroku.mapper.ResponseMapper;
+import cn.net.miroku.service.CompletionService;
 import cn.net.miroku.service.ModelService;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Response;
@@ -16,7 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ChatCompletionServiceImpl implements cn.net.miroku.service.ChatCompletionService {
+public class CompletionServiceImpl implements CompletionService {
     private final List<LlmAdapter> llmStrategies;
     private final ModelService modelService;
     private final ResponseMapper responseMapper;
@@ -42,7 +43,7 @@ public class ChatCompletionServiceImpl implements cn.net.miroku.service.ChatComp
     @Override
     @Async("dbSaveExecutor")
     @Transactional(rollbackFor = Exception.class)
-    public void saveChatCompletion(MirokuResponse mirokuResponse) {
+    public void save(MirokuResponse mirokuResponse) {
         responseMapper.insertResponse(mirokuResponse);
         responseMapper.insertChoices(mirokuResponse);
     }

@@ -4,7 +4,7 @@ import cn.net.miroku.dto.Choice;
 import cn.net.miroku.dto.Message;
 import cn.net.miroku.dto.chat.completion.MirokuResponse;
 import cn.net.miroku.dto.chat.completion.MirokuRequest;
-import cn.net.miroku.service.impl.ChatCompletionServiceImpl;
+import cn.net.miroku.service.impl.CompletionServiceImpl;
 import cn.net.miroku.tool.JsonUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/v1/chat/completions")
 public class CompletionController {
-    private final ChatCompletionServiceImpl chatCompletionService;
+    private final CompletionServiceImpl chatCompletionService;
 
     @PostMapping
     public Object createChatCompletion(@RequestBody MirokuRequest mirokuRequest, HttpServletResponse response) throws IOException {
@@ -99,7 +99,7 @@ public class CompletionController {
                         }
 
                         // 保存到数据库
-                        chatCompletionService.saveChatCompletion(resp);
+                        chatCompletionService.save(resp);
                     } finally {
                         llmResponse.close(); // 释放链接
                     }
@@ -115,7 +115,7 @@ public class CompletionController {
                 if (llmResponse.body() != null) {
                     String jsonData = llmResponse.body().string();
                     MirokuResponse resp = JsonUtils.toDto(jsonData, MirokuResponse.class);
-                    chatCompletionService.saveChatCompletion(resp);
+                    chatCompletionService.save(resp);
                     return resp;
                 }
                 return null;
