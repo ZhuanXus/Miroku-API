@@ -1,6 +1,7 @@
 package cn.net.miroku.service.impl;
 
-import cn.net.miroku.dto.chat.completion.Request;
+import cn.net.miroku.dto.chat.completion.MirokuResponse;
+import cn.net.miroku.dto.chat.completion.MirokuRequest;
 import cn.net.miroku.adapter.LlmAdapter;
 import cn.net.miroku.mapper.ResponseMapper;
 import cn.net.miroku.service.ModelService;
@@ -21,18 +22,18 @@ public class ChatCompletionServiceImpl implements cn.net.miroku.service.ChatComp
     private final ResponseMapper responseMapper;
 
     @Override
-    public Response createChatCompletion(Request request) throws IOException {
+    public Response create(MirokuRequest mirokuRequest) throws IOException {
         // 倘若调用了不存在的模型，则返回 null
         if (modelService.getModels().parallelStream().noneMatch(
-                model -> model.getId().equals(request.getModel())
+                model -> model.getId().equals(mirokuRequest.getModel())
             )) {
             return null;
         }
 
 
         for (LlmAdapter strategy : llmStrategies) {
-            if (strategy.support(request.getModel())) {
-                return strategy.createChatCompletion(request);
+            if (strategy.support(mirokuRequest.getModel())) {
+                return strategy.createChatCompletion(mirokuRequest);
             }
         }
         return null;
@@ -41,8 +42,13 @@ public class ChatCompletionServiceImpl implements cn.net.miroku.service.ChatComp
     @Override
     @Async("dbSaveExecutor")
     @Transactional(rollbackFor = Exception.class)
-    public void saveChatCompletion(cn.net.miroku.dto.chat.completion.Response response) {
-        responseMapper.insertResponse(response);
-        responseMapper.insertChoices(response);
+    public void saveChatCompletion(MirokuResponse mirokuResponse) {
+        responseMapper.insertResponse(mirokuResponse);
+        responseMapper.insertChoices(mirokuResponse);
+    }
+
+    @Override
+    public MirokuResponse select(String respId) {
+        return responseMapper.selectChoices(respId);
     }
 }

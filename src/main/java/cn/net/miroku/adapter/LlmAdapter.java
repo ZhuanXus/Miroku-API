@@ -1,6 +1,6 @@
 package cn.net.miroku.adapter;
 
-import cn.net.miroku.dto.chat.completion.Request;
+import cn.net.miroku.dto.chat.completion.MirokuRequest;
 import lombok.RequiredArgsConstructor;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
@@ -22,5 +22,5 @@ public abstract class LlmAdapter {
     /**
      * 创建聊天补全
      */
-    public abstract Response createChatCompletion(Request request) throws IOException;
+    public abstract Response createChatCompletion(MirokuRequest mirokuRequest) throws IOException;
 }

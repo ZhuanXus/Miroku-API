@@ -1,7 +1,7 @@
 package cn.net.miroku.adapter;
 
 import cn.net.miroku.configuration.llm.config.Deepseek;
-import cn.net.miroku.dto.chat.completion.Request;
+import cn.net.miroku.dto.chat.completion.MirokuRequest;
 import cn.net.miroku.tool.JsonUtils;
 import okhttp3.*;
 import org.springframework.stereotype.Component;
@@ -25,9 +25,9 @@ public class DeepSeekAdapter extends LlmAdapter {
     }
 
     @Override
-    public Response createChatCompletion(Request completionRequest) throws IOException {
+    public Response createChatCompletion(MirokuRequest completionMirokuRequest) throws IOException {
         // 遍历消息体，把 developer 角色替换为 system 角色 function 角色替换为 tool 角色
-        completionRequest.getMessages().forEach(message -> {
+        completionMirokuRequest.getMessages().forEach(message -> {
             if ("developer".equals(message.getRole())) {
                 message.setRole("system");
             } else if ("function".equals(message.getRole())) {
@@ -37,12 +37,12 @@ public class DeepSeekAdapter extends LlmAdapter {
 
         // 组装请求体
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(JsonUtils.toJson(completionRequest), mediaType);
+        RequestBody body = RequestBody.create(JsonUtils.toJson(completionMirokuRequest), mediaType);
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url(properties.getBaseUrl() + "/chat/completions")
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Accept", completionRequest.getStream() == true ? "text/event-stream" :"application/json")
+                .addHeader("Accept", completionMirokuRequest.getStream() == true ? "text/event-stream" :"application/json")
                 .addHeader("Authorization", "Bearer " + properties.getApiKey())
                 .build();
 

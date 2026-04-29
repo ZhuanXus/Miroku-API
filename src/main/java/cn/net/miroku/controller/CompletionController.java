@@ -2,15 +2,13 @@ package cn.net.miroku.controller;
 
 import cn.net.miroku.dto.Choice;
 import cn.net.miroku.dto.Message;
-import cn.net.miroku.dto.chat.completion.Request;
-import cn.net.miroku.dto.chat.completion.Response;
+import cn.net.miroku.dto.chat.completion.MirokuResponse;
+import cn.net.miroku.dto.chat.completion.MirokuRequest;
 import cn.net.miroku.service.impl.ChatCompletionServiceImpl;
 import cn.net.miroku.tool.JsonUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import tools.jackson.databind.JsonNode;
 
@@ -23,20 +21,21 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-public class ChatController {
+@RequestMapping("/v1/chat/completions")
+public class CompletionController {
     private final ChatCompletionServiceImpl chatCompletionService;
 
-    @PostMapping("/v1/chat/completions")
-    public Object createChatCompletion(@RequestBody Request request, HttpServletResponse response) throws IOException {
+    @PostMapping
+    public Object createChatCompletion(@RequestBody MirokuRequest mirokuRequest, HttpServletResponse response) throws IOException {
         // 调用 LLM 获取响应
-        okhttp3.Response llmResponse = chatCompletionService.createChatCompletion(request);
+        okhttp3.Response llmResponse = chatCompletionService.create(mirokuRequest);
 
         // 设置响应码
         response.setStatus(llmResponse.code());
 
         // 根据是否流式返回不同结果
         response.setCharacterEncoding("UTF-8");
-        if (request.getStream() == true) {
+        if (mirokuRequest.getStream() == true) {
             // 流式分支
             response.setContentType("text/event-stream");
 
@@ -55,7 +54,7 @@ public class ChatController {
                         String line;
                         StringBuilder ctx = new StringBuilder();
 
-                        Response resp = new Response();
+                        MirokuResponse resp = new MirokuResponse();
                         Choice choice = new Choice();
                         while((line = reader.readLine()) != null) {
                             //System.out.println(line);
@@ -107,17 +106,6 @@ public class ChatController {
                 } else {
                     // 如果响应体为空
                 }
-
-/*                try (InputStream in = llmResponse.body().byteStream()) {
-                    byte[] buffer = new byte[8192];
-                    int len;
-                    while ((len = in.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, len);
-                        outputStream.flush(); // ⚠️ 关键：SSE 必须 flush，否则客户端卡住
-                    }
-                } finally {
-                    llmResponse.close(); // 释放链接
-                }*/
             };
         } else {
             // 非流式
@@ -126,7 +114,7 @@ public class ChatController {
             try {
                 if (llmResponse.body() != null) {
                     String jsonData = llmResponse.body().string();
-                    Response resp = JsonUtils.toDto(jsonData, Response.class);
+                    MirokuResponse resp = JsonUtils.toDto(jsonData, MirokuResponse.class);
                     chatCompletionService.saveChatCompletion(resp);
                     return resp;
                 }
@@ -135,5 +123,10 @@ public class ChatController {
                 llmResponse.close(); // 释放链接
             }
         }
+    }
+
+    @GetMapping("/{respId}")
+    public MirokuResponse select(@PathVariable("respId") String respId) {
+        return chatCompletionService.select(respId);
     }
 }

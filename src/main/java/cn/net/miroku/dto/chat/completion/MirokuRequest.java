@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Request {
+public class MirokuRequest {
     /**
      * 使用模型
      */
