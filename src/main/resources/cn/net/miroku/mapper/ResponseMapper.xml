@@ -28,7 +28,6 @@
     </insert>
 
     <!-- 查询某条补全的 详细回复列表 -->
-
     <!-- 手动配置结果映射集 -->
     <resultMap id="ResponseMap" type="cn.net.miroku.dto.chat.completion.MirokuResponse">
         <id property="id" column="resp_id"/>
@@ -61,4 +60,18 @@
                  LEFT JOIN choices c ON r.id = c.response_id
         WHERE r.id = #{respId};
     </select>
+
+    <!-- 删除补全 -->
+    <!-- 删除响应 -->
+    <delete id="deleteResponse" parameterType="string">
+        DELETE
+        FROM response
+        WHERE id = #{respId}
+    </delete>
+
+    <!-- 删除详细回复 -->
+    <delete id="deleteChoices" parameterType="string">
+        DELETE FROM choices
+        WHERE response_id = #{respId}
+    </delete>
 </mapper>

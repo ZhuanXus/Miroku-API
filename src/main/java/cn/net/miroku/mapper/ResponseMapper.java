@@ -20,4 +20,14 @@ public interface ResponseMapper {
      * 查询某条补全
      */
     MirokuResponse selectResponse(@Param("respId") String respId);
+
+    /**
+     * 删除响应
+     */
+    Integer deleteResponse(@Param("respId") String respId);
+
+    /**
+     * 删除详细回复
+     */
+    void deleteChoices(@Param("respId") String respId);
 }

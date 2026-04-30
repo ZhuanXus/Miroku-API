@@ -2,6 +2,7 @@ package cn.net.miroku.controller;
 
 import cn.net.miroku.dto.Choice;
 import cn.net.miroku.dto.Message;
+import cn.net.miroku.dto.chat.completion.DeletedResponse;
 import cn.net.miroku.dto.chat.completion.MirokuResponse;
 import cn.net.miroku.dto.chat.completion.MirokuRequest;
 import cn.net.miroku.service.impl.CompletionServiceImpl;
@@ -128,5 +129,13 @@ public class CompletionController {
     @GetMapping("/{respId}")
     public MirokuResponse select(@PathVariable("respId") String respId) {
         return chatCompletionService.select(respId);
+    }
+
+    @DeleteMapping("/{respId}")
+    public DeletedResponse delete(@PathVariable("respId") String respId) {
+        DeletedResponse deleteResp = new DeletedResponse();
+        deleteResp.setId(respId);
+        deleteResp.setDeleted(chatCompletionService.delete(respId));
+        return deleteResp;
     }
 }

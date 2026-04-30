@@ -52,4 +52,11 @@ public class CompletionServiceImpl implements CompletionService {
     public MirokuResponse select(String respId) {
         return responseMapper.selectResponse(respId);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean delete(String respId) {
+        responseMapper.deleteChoices(respId);
+        return responseMapper.deleteResponse(respId) == 1;
+    }
 }

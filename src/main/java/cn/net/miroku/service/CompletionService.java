@@ -21,4 +21,9 @@ public interface CompletionService {
      * 查询聊天补全
      */
     MirokuResponse select(String respId);
+
+    /**
+     * 删除聊天补全
+     */
+    Boolean delete(String respId);
 }
