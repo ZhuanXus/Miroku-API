@@ -13,6 +13,7 @@ import okhttp3.Call;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,9 +41,8 @@ public class CompletionController {
         // 设置响应码
         response.setStatus(llmResponse.code());
 
-        // 设置响应头 将 id 设置到响应头
+        // 设置响应头
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Miroku-completion-id", id);
 
         // 根据是否流式返回不同结果
         if (mirokuRequest.getStream() == true) {
@@ -53,43 +53,63 @@ public class CompletionController {
             return (StreamingResponseBody) outputStream -> {
                 MirokuResponse resp = new MirokuResponse();
                 Choice choice = new Choice();
-                StringBuilder ctx = new StringBuilder();;
+                StringBuilder ctx = new StringBuilder();
                 if (llmResponse.body() != null) {
                     // 如果响应体不为空
                     try (
                             // 获取上游的原始字节流
                             InputStream in = llmResponse.body().byteStream();
 
-                            // 将字节流包装成 BufferedReader
-                            // 作用：将字节流逐行读取
+                            // 将字节流包装成 BufferedReader 作用：将字节流逐行读取
                             BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))
                     ) {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             //System.out.println(line);
+                            // 跳过空行
+                            if (line.isEmpty()) {
+                                outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+                                outputStream.flush();
+                                continue;
+                            }
 
-                            // 跳过换行
-                            if (line.isEmpty()) continue;
+                            // 跳过非数据行 数据行格式：前六个字符包含data
+                            String prefix = line.substring(0, 6);
+                            if (!prefix.contains("data")) {
+                                outputStream.write(line.getBytes(StandardCharsets.UTF_8));
+                                outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
+                                outputStream.flush();
+                                continue;
+                            }
 
-                            // 中转数据给客户端
-                            outputStream.write(line.getBytes(StandardCharsets.UTF_8));
-                            outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
-                            outputStream.flush(); // 立刻推送数据 不进行缓存
 
-                            // 跳过前六个多余字符 data:  获取响应数据
+                            // 提纯 json 处理 [DONE] 结束标识
                             String jsonData = line.substring(6).trim();
-
-                            // 如果遇到结束标志 [DONE] 就停止
                             if (jsonData.equals("[DONE]")) {
+                                // 中转数据给客户端
+                                outputStream.write((prefix + "[DONE]\n\n").getBytes(StandardCharsets.UTF_8));
+                                outputStream.flush();   // 立即推送 不缓存
                                 choice.setFinishReason("stop");
                                 break;
                             }
 
-                            // 拼装记录
                             JsonNode jsonNode = JsonUtils.toJsonNode(jsonData);
+                            if (jsonNode instanceof ObjectNode objectNode) {
+                                // 替换 id
+                                objectNode.put("id", id);
+
+                                // 转 json 为 字符串 并压缩成一行
+                                String sseLines = objectNode.toString();
+                                sseLines = prefix + sseLines;
+
+                                // 中转数据给客户端
+                                outputStream.write(sseLines.getBytes(StandardCharsets.UTF_8));
+                                outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
+                                outputStream.flush(); // 立即推送 不缓存
+                            }
+
+                            // 拼装记录
                             if (resp.getId() == null) {
-                                // 设置 response
-                                //resp.setId(jsonNode.path("id").asString());
                                 resp.setId(id);
                                 resp.setObject(jsonNode.path("object").asString());
                                 resp.setCreated(jsonNode.path("created").asLong());
@@ -100,6 +120,7 @@ public class CompletionController {
                                         .path("choices")
                                         .path(0).path("index").asInt());
                             }
+
                             // 拼接回复内容
                             ctx.append(jsonNode.path("choices").path(0)
                                     .path("delta").path("content")
@@ -143,8 +164,7 @@ public class CompletionController {
                 } else {
                     throw e;
                 }
-            }
-            finally {
+            } finally {
                 // 释放链接
                 llmResponse.close();
             }
