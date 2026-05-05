@@ -53,7 +53,7 @@ public class CompletionController {
             return (StreamingResponseBody) outputStream -> {
                 MirokuResponse resp = new MirokuResponse();
                 Choice choice = new Choice();
-                StringBuilder ctx = new StringBuilder();
+                StringBuilder fullcontent = new StringBuilder();
                 if (llmResponse.body() != null) {
                     // 如果响应体不为空
                     try (
@@ -99,11 +99,11 @@ public class CompletionController {
                                 objectNode.put("id", id);
 
                                 // 转 json 为 字符串 并压缩成一行
-                                String sseLines = objectNode.toString();
-                                sseLines = prefix + sseLines;
+                                String sseLine = objectNode.toString();
+                                sseLine = prefix + sseLine;
 
                                 // 中转数据给客户端
-                                outputStream.write(sseLines.getBytes(StandardCharsets.UTF_8));
+                                outputStream.write(sseLine.getBytes(StandardCharsets.UTF_8));
                                 outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
                                 outputStream.flush(); // 立即推送 不缓存
                             }
@@ -122,9 +122,11 @@ public class CompletionController {
                             }
 
                             // 拼接回复内容
-                            ctx.append(jsonNode.path("choices").path(0)
-                                    .path("delta").path("content")
-                                    .asString());
+                            String content = jsonNode.path("choices").path(0)
+                                    .path("delta").path("content").asString();
+                            if (content != null && !content.isEmpty()) {
+                                fullcontent.append(content);
+                            }
                         }
                     } catch (IOException e) {
                         if (tempCall.isCanceled()) {
@@ -136,7 +138,7 @@ public class CompletionController {
                         // 释放链接
                         llmResponse.close();
                         // 组装数据
-                        choice.setMessage(new Message("assistant", ctx.toString()));
+                        choice.setMessage(new Message("assistant", fullcontent.toString()));
                         resp.setChoices(List.of(choice));
                         // 保存到数据库
                         chatCompletionService.save(resp);
