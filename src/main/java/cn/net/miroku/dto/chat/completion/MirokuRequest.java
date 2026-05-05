@@ -22,5 +22,5 @@ public class MirokuRequest {
     /**
      * 是否开启流式传输
      */
-    private Boolean stream;
+    private Boolean stream = false;
 }

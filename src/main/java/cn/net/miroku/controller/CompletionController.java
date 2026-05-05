@@ -9,6 +9,7 @@ import cn.net.miroku.service.impl.CompletionServiceImpl;
 import cn.net.miroku.tool.JsonUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import okhttp3.Call;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import tools.jackson.databind.JsonNode;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,20 +30,30 @@ public class CompletionController {
 
     @PostMapping
     public Object create(@RequestBody MirokuRequest mirokuRequest, HttpServletResponse response) throws IOException {
+        // 生成本地id
+        String id = "Miroku-" + UUID.randomUUID();
+
         // 调用 LLM 获取响应
-        okhttp3.Response llmResponse = chatCompletionService.create(mirokuRequest);
+        Call tempCall = chatCompletionService.create(mirokuRequest, id);
+        okhttp3.Response llmResponse = tempCall.execute();
 
         // 设置响应码
         response.setStatus(llmResponse.code());
 
-        // 根据是否流式返回不同结果
+        // 设置响应头 将 id 设置到响应头
         response.setCharacterEncoding("UTF-8");
+        response.setHeader("Miroku-completion-id", id);
+
+        // 根据是否流式返回不同结果
         if (mirokuRequest.getStream() == true) {
             // 流式分支
             response.setContentType("text/event-stream");
 
             // 返回 StreamingResponseBody，Spring 会异步执行 writeTo
             return (StreamingResponseBody) outputStream -> {
+                MirokuResponse resp = new MirokuResponse();
+                Choice choice = new Choice();
+                StringBuilder ctx = new StringBuilder();;
                 if (llmResponse.body() != null) {
                     // 如果响应体不为空
                     try (
@@ -53,11 +65,7 @@ public class CompletionController {
                             BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))
                     ) {
                         String line;
-                        StringBuilder ctx = new StringBuilder();
-
-                        MirokuResponse resp = new MirokuResponse();
-                        Choice choice = new Choice();
-                        while((line = reader.readLine()) != null) {
+                        while ((line = reader.readLine()) != null) {
                             //System.out.println(line);
 
                             // 跳过换行
@@ -74,8 +82,6 @@ public class CompletionController {
                             // 如果遇到结束标志 [DONE] 就停止
                             if (jsonData.equals("[DONE]")) {
                                 choice.setFinishReason("stop");
-                                choice.setMessage(new Message("assistant", ctx.toString()));
-                                resp.setChoices(List.of(choice));
                                 break;
                             }
 
@@ -83,7 +89,8 @@ public class CompletionController {
                             JsonNode jsonNode = JsonUtils.toJsonNode(jsonData);
                             if (resp.getId() == null) {
                                 // 设置 response
-                                resp.setId(jsonNode.path("id").asString());
+                                //resp.setId(jsonNode.path("id").asString());
+                                resp.setId(id);
                                 resp.setObject(jsonNode.path("object").asString());
                                 resp.setCreated(jsonNode.path("created").asLong());
                                 resp.setModel(jsonNode.path("model").asString());
@@ -98,11 +105,20 @@ public class CompletionController {
                                     .path("delta").path("content")
                                     .asString());
                         }
-
+                    } catch (IOException e) {
+                        if (tempCall.isCanceled()) {
+                            choice.setFinishReason("cancel");
+                        } else {
+                            throw e;
+                        }
+                    } finally {
+                        // 释放链接
+                        llmResponse.close();
+                        // 组装数据
+                        choice.setMessage(new Message("assistant", ctx.toString()));
+                        resp.setChoices(List.of(choice));
                         // 保存到数据库
                         chatCompletionService.save(resp);
-                    } finally {
-                        llmResponse.close(); // 释放链接
                     }
                 } else {
                     // 如果响应体为空
@@ -116,12 +132,21 @@ public class CompletionController {
                 if (llmResponse.body() != null) {
                     String jsonData = llmResponse.body().string();
                     MirokuResponse resp = JsonUtils.toDto(jsonData, MirokuResponse.class);
+                    resp.setId(id);
                     chatCompletionService.save(resp);
                     return resp;
                 }
                 return null;
-            } finally {
-                llmResponse.close(); // 释放链接
+            } catch (IOException e) {
+                if (tempCall.isCanceled()) {
+                    return null;
+                } else {
+                    throw e;
+                }
+            }
+            finally {
+                // 释放链接
+                llmResponse.close();
             }
         }
     }
@@ -137,5 +162,10 @@ public class CompletionController {
         deleteResp.setId(respId);
         deleteResp.setDeleted(chatCompletionService.delete(respId));
         return deleteResp;
+    }
+
+    @PostMapping("/{respId}/cancel")
+    public void cancel(@PathVariable("respId") String id) {
+        chatCompletionService.cancel(id);
     }
 }

@@ -76,6 +76,14 @@
             <artifactId>sa-token-spring-boot4-starter</artifactId>
             <version>1.45.0</version>
         </dependency>
+
+        <!-- OPENAI JAVA SDK 集成测试用 -->
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>4.34.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

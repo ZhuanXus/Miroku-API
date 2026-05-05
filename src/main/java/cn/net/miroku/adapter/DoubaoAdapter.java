@@ -3,13 +3,8 @@ package cn.net.miroku.adapter;
 import cn.net.miroku.configuration.llm.config.DouBao;
 import cn.net.miroku.dto.chat.completion.MirokuRequest;
 import cn.net.miroku.tool.JsonUtils;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.*;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 /**
  * 豆包适配器
@@ -29,7 +24,7 @@ public class DoubaoAdapter extends LlmAdapter {
     }
 
     @Override
-    public Response createChatCompletion(MirokuRequest completionMirokuRequest) throws IOException {
+    public Call createChatCompletion(MirokuRequest completionMirokuRequest) {
         // 遍历消息体，把 developer 角色替换为 system 角色 function 角色替换为 tool 角色
         completionMirokuRequest.getMessages().forEach(message -> {
             if ("developer".equals(message.getRole())) {
@@ -51,6 +46,6 @@ public class DoubaoAdapter extends LlmAdapter {
                 .build();
 
         // 发送请求给 doubao 服务商 获取响应头
-        return okHttpClient.newCall(request).execute();
+        return okHttpClient.newCall(request);
     }
 }

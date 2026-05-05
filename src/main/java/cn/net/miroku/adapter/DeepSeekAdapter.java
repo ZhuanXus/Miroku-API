@@ -6,8 +6,6 @@ import cn.net.miroku.tool.JsonUtils;
 import okhttp3.*;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
 @Component
 public class DeepSeekAdapter extends LlmAdapter {
     /** 配置 */
@@ -25,7 +23,7 @@ public class DeepSeekAdapter extends LlmAdapter {
     }
 
     @Override
-    public Response createChatCompletion(MirokuRequest completionMirokuRequest) throws IOException {
+    public Call createChatCompletion(MirokuRequest completionMirokuRequest) {
         // 遍历消息体，把 developer 角色替换为 system 角色 function 角色替换为 tool 角色
         completionMirokuRequest.getMessages().forEach(message -> {
             if ("developer".equals(message.getRole())) {
@@ -47,6 +45,6 @@ public class DeepSeekAdapter extends LlmAdapter {
                 .build();
 
         // 发送请求给 DeepSeek 服务商 获取响应头
-        return okHttpClient.newCall(request).execute();
+        return okHttpClient.newCall(request);
     }
 }
