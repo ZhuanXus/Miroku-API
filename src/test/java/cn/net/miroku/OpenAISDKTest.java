@@ -28,14 +28,13 @@ public class OpenAISDKTest {
     @LocalServerPort
     private int randomPort;
     private OpenAIClient client;
-    private String baseUrl;
 
     @BeforeEach
     public void setUp() {
-        baseUrl = "http://localhost:" + randomPort + "/v1";
+        String baseUrl = "http://localhost:" + randomPort + "/v1";
         client = OpenAIOkHttpClient.builder()
                 .baseUrl(baseUrl)
-                .apiKey("sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+                .apiKey("sk")
                 // 30秒超时
                 .timeout(Duration.ofSeconds(30))
                 .build();
