@@ -53,7 +53,7 @@ public class CompletionController {
             return (StreamingResponseBody) outputStream -> {
                 MirokuResponse resp = new MirokuResponse();
                 Choice choice = new Choice();
-                StringBuilder fullcontent = new StringBuilder();
+                StringBuilder fullContent = new StringBuilder();
                 if (llmResponse.body() != null) {
                     // 如果响应体不为空
                     try (
@@ -125,7 +125,7 @@ public class CompletionController {
                             String content = jsonNode.path("choices").path(0)
                                     .path("delta").path("content").asString();
                             if (content != null && !content.isEmpty()) {
-                                fullcontent.append(content);
+                                fullContent.append(content);
                             }
                         }
                     } catch (IOException e) {
@@ -138,7 +138,7 @@ public class CompletionController {
                         // 释放链接
                         llmResponse.close();
                         // 组装数据
-                        choice.setMessage(new Message("assistant", fullcontent.toString()));
+                        choice.setMessage(new Message("assistant", fullContent.toString()));
                         resp.setChoices(List.of(choice));
                         // 保存到数据库
                         chatCompletionService.save(resp);

@@ -8,13 +8,14 @@ import com.openai.models.chat.completions.ChatCompletionChunk;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,7 +55,7 @@ public class OpenAISDKTest {
             ChatCompletion completion = client.chat().completions().create(params);
 
             assertThat(completion).isNotNull();
-            assertThat(completion.id()).isNotEmpty();
+            assertThat(completion.id()).isNotEmpty().startsWith("Miroku");
             assertThat(completion.choices()).hasSize(1);
             assertThat(completion.choices().getFirst().message().content()).isNotEmpty();
 
@@ -76,15 +77,32 @@ public class OpenAISDKTest {
                 .model(model)
                 .build();
 
-        /*assertDoesNotThrow(() -> {
+        assertDoesNotThrow(() -> {
+            try (StreamResponse<ChatCompletionChunk> streamResponse = client.chat().completions().createStreaming(params)){
+                AtomicReference<String> id = new AtomicReference<>();
+                AtomicInteger chunkCount = new AtomicInteger(0);
+                StringBuilder content = new StringBuilder();
 
-        });*/
+                streamResponse.stream().forEach(chunk -> {
+                    // chunkCount++
+                    chunkCount.getAndIncrement();
 
-        try (StreamResponse<ChatCompletionChunk> streamResponse = client.chat().completions().createStreaming(params)) {
-            streamResponse.stream().forEach(chunk -> {
-                System.out.println(chunk);
-            });
-            System.out.println("No more chunks!");
-        }
+                    if (chunkCount.get() == 1) {
+                        id.set(chunk.id());
+                    }
+                    content.append(chunk.choices().getFirst().delta().content().orElse(""));
+                });
+                String result = content.toString();
+
+                assertThat(id.toString()).isNotEmpty().startsWith("").startsWith("Miroku");
+                assertThat(result).isNotEmpty();
+                assertThat(chunkCount.get()).isGreaterThan(0);
+
+                System.out.println("\n\nid: " + id);
+                System.out.println("content: " + result);
+                System.out.println("chunkCount: " + chunkCount);
+                System.out.println("\n");
+            }
+        }, "模型：" + model + "解析出错");
     }
 }
