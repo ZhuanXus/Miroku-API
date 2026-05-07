@@ -1,6 +1,5 @@
-package cn.net.miroku.dto.chat.completion;
+package cn.net.miroku.dto.completion;
 
-import cn.net.miroku.dto.Message;
 import lombok.Data;
 
 import java.util.List;

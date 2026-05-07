@@ -1,10 +1,10 @@
 package cn.net.miroku.controller;
 
-import cn.net.miroku.dto.Choice;
-import cn.net.miroku.dto.Message;
-import cn.net.miroku.dto.chat.completion.DeletedResponse;
-import cn.net.miroku.dto.chat.completion.MirokuResponse;
-import cn.net.miroku.dto.chat.completion.MirokuRequest;
+import cn.net.miroku.dto.completion.Choice;
+import cn.net.miroku.dto.completion.Message;
+import cn.net.miroku.dto.completion.DeletedResponse;
+import cn.net.miroku.dto.completion.MirokuResponse;
+import cn.net.miroku.dto.completion.MirokuRequest;
 import cn.net.miroku.service.impl.CompletionServiceImpl;
 import cn.net.miroku.tool.JsonUtils;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,3 +1,4 @@
+# Spring 配置
 spring:
   application:
     name:
@@ -25,7 +26,7 @@ mybatis:
     # 打印完整 SQL
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
+# Sa-Token 配置 (文档: https://sa-token.cc)
 sa-token:
   # token 有效期（单位：秒） 默认30天，-1 代表永久有效
   timeout: -1
@@ -41,14 +42,9 @@ sa-token:
   token-name: Authorization
   # token 前缀
   token-prefix: Bearer
-  # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
-  # is-concurrent: false
-  # 最大登录数
-  # max-login-count: 1
 
-
-# 多模型配置
-models:
+# 模型配置
+miroku-api:
   # deepseek 配置
   deepseek:
     base-url: https://api.deepseek.com/v1
@@ -60,9 +56,8 @@ models:
   qwen:
     base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
     api-key: ${QWEN_API_KEY:}
-
   # 可用的模型列表
-  model-data-list:
+  model-list:
     - id: deepseek-chat
       owned_by: deepseek
     - id: deepseek-reasoner

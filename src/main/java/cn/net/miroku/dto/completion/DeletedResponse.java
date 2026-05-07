@@ -1,4 +1,4 @@
-package cn.net.miroku.dto.chat.completion;
+package cn.net.miroku.dto.completion;
 
 import lombok.Data;
 

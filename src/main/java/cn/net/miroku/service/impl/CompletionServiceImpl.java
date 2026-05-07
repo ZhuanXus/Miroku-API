@@ -1,7 +1,7 @@
 package cn.net.miroku.service.impl;
 
-import cn.net.miroku.dto.chat.completion.MirokuResponse;
-import cn.net.miroku.dto.chat.completion.MirokuRequest;
+import cn.net.miroku.dto.completion.MirokuResponse;
+import cn.net.miroku.dto.completion.MirokuRequest;
 import cn.net.miroku.adapter.LlmAdapter;
 import cn.net.miroku.mapper.ResponseMapper;
 import cn.net.miroku.service.CompletionService;

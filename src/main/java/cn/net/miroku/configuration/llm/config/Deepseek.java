@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "models.deepseek")
+@ConfigurationProperties(prefix = "miroku-api.deepseek")
 public class Deepseek {
     private String baseUrl;
     private String apiKey;

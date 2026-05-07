@@ -1,6 +1,6 @@
 package cn.net.miroku.adapter;
 
-import cn.net.miroku.dto.chat.completion.MirokuRequest;
+import cn.net.miroku.dto.completion.MirokuRequest;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;

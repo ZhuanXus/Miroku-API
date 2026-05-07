@@ -1,7 +1,6 @@
 package cn.net.miroku.configuration;
 
-import cn.net.miroku.dto.ModelData;
-import lombok.AllArgsConstructor;
+import cn.net.miroku.dto.Model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,7 +12,7 @@ import java.util.List;
 @Data
 @Component
 @NoArgsConstructor
-@ConfigurationProperties(prefix = "models")
+@ConfigurationProperties(prefix = "miroku-api")
 public class ModelDataConfigurationProperty {
-    private final List<ModelData> modelDataList = new ArrayList<>();
+    private final List<Model> modelList = new ArrayList<>();
 }

@@ -1,6 +1,6 @@
 package cn.net.miroku.mapper;
 
-import cn.net.miroku.dto.chat.completion.MirokuResponse;
+import cn.net.miroku.dto.completion.MirokuResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

@@ -20,5 +20,5 @@ public class ModelResponse {
     /**
      * 数据
      */
-    private List<ModelData> data;
+    private List<Model> data;
 }

@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.net.miroku.mapper.ResponseMapper">
     <!-- 写入响应表 -->
-    <insert id="insertResponse" parameterType="cn.net.miroku.dto.chat.completion.MirokuResponse">
+    <insert id="insertResponse" parameterType="cn.net.miroku.dto.completion.MirokuResponse">
         INSERT INTO response(id, object, created, model)
         VALUES (#{response.id},
                 #{response.object},
@@ -13,7 +13,7 @@
     </insert>
 
     <!-- 写入单条详细回复表 -->
-    <insert id="insertChoices" parameterType="cn.net.miroku.dto.chat.completion.MirokuResponse">
+    <insert id="insertChoices" parameterType="cn.net.miroku.dto.completion.MirokuResponse">
         INSERT INTO choices(response_id, index_, message_content, message_role, finish_reason)
         VALUES
         <foreach collection="response.choices" item="choice" separator=",">
@@ -29,18 +29,18 @@
 
     <!-- 查询某条补全的 详细回复列表 -->
     <!-- 手动配置结果映射集 -->
-    <resultMap id="ResponseMap" type="cn.net.miroku.dto.chat.completion.MirokuResponse">
+    <resultMap id="ResponseMap" type="cn.net.miroku.dto.completion.MirokuResponse">
         <id property="id" column="resp_id"/>
         <result property="object" column="resp_object"/>
         <result property="created" column="resp_created"/>
         <result property="model" column="resp_model"/>
 
         <!-- collection 一对多映射 -->
-        <collection property="choices" ofType="cn.net.miroku.dto.Choice">
+        <collection property="choices" ofType="cn.net.miroku.dto.completion.Choice">
             <result property="index" column="choice_index"/>
             <result property="finishReason" column="choice_finish_reason"/>
             <!-- association 嵌套 Message 对象 -->
-            <association property="message" javaType="cn.net.miroku.dto.Message">
+            <association property="message" javaType="cn.net.miroku.dto.completion.Message">
                 <result property="role" column="choice_message_role"/>
                 <result property="content" column="choice_mesage_ctx"/>
             </association>

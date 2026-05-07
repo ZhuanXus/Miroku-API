@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "models.qwen")
+@ConfigurationProperties(prefix = "miroku-api.qwen")
 public class Qwen {
     private String baseUrl;
     private String apiKey;

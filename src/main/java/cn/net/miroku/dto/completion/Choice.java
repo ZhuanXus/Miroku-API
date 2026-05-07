@@ -1,4 +1,4 @@
-package cn.net.miroku.dto;
+package cn.net.miroku.dto.completion;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
 package cn.net.miroku.service;
 
-import cn.net.miroku.dto.chat.completion.MirokuResponse;
-import cn.net.miroku.dto.chat.completion.MirokuRequest;
+import cn.net.miroku.dto.completion.MirokuResponse;
+import cn.net.miroku.dto.completion.MirokuRequest;
 import okhttp3.Call;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package cn.net.miroku.dto;
+package cn.net.miroku.dto.completion;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
