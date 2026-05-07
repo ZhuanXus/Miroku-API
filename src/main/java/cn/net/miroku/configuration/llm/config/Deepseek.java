@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@NoArgsConstructor
 @ConfigurationProperties(prefix = "models.deepseek")
 public class Deepseek {
     private String baseUrl;

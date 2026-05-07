@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(SaTokenException.class)
-    public ResponseEntity<OpenAiError> handleSaTokenException() {
+    public ResponseEntity<OpenAiError> handleSaTokenException(SaTokenException e) {
+        e.printStackTrace();
+
         /*
             https://sa-token.cc/doc.html#/fun/exception-code
             这里其实根据 SaToken的异常码 可以分为很多种类的
@@ -32,7 +34,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<OpenAiError> handleException() {
+    public ResponseEntity<OpenAiError> handleException(Exception e) {
+        e.printStackTrace();
+
         OpenAiError.ErrorDetail errorDetail = OpenAiError.ErrorDetail.builder()
                 .message("服务器内部发生错误")
                 .type("server_error")

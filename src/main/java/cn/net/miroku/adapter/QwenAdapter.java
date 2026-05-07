@@ -1,26 +1,27 @@
 package cn.net.miroku.adapter;
 
 import cn.net.miroku.configuration.llm.config.DouBao;
+import cn.net.miroku.configuration.llm.config.Qwen;
 import cn.net.miroku.dto.chat.completion.MirokuRequest;
 import cn.net.miroku.tool.JsonUtils;
 import okhttp3.*;
 import org.springframework.stereotype.Component;
 
 /**
- * 豆包适配器
+ * QWEN 适配器
  */
 @Component
-public class DoubaoAdapter extends LlmAdapter {
-    private final DouBao properties;
+public class QwenAdapter extends LlmAdapter {
+    private final Qwen properties;
 
-    public DoubaoAdapter(OkHttpClient okHttpClient, DouBao properties) {
+    public QwenAdapter(OkHttpClient okHttpClient, Qwen properties) {
         super(okHttpClient);
         this.properties = properties;
     }
 
     @Override
     public boolean support(String model) {
-        return model.startsWith("doubao");
+        return model.startsWith("qwen");
     }
 
     @Override
@@ -37,7 +38,7 @@ public class DoubaoAdapter extends LlmAdapter {
         // 组装请求体
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(JsonUtils.toJson(completionMirokuRequest), mediaType);
-        okhttp3.Request request = new okhttp3.Request.Builder()
+        Request request = new Request.Builder()
                 .url(properties.getBaseUrl() + "/chat/completions")
                 .method("POST", body)
                 .addHeader("Content-Type", "application/json")
@@ -45,7 +46,7 @@ public class DoubaoAdapter extends LlmAdapter {
                 .addHeader("Authorization", "Bearer " + properties.getApiKey())
                 .build();
 
-        // 发送请求给 doubao 服务商 获取响应头
+        // 发送请求给 阿里云 服务商 获取响应头
         return okHttpClient.newCall(request);
     }
 }
