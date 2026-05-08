@@ -1,4 +1,4 @@
-package cn.net.miroku.configuration.llm.config;
+package cn.net.miroku.configuration.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

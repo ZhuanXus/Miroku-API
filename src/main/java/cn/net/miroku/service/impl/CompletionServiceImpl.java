@@ -26,7 +26,7 @@ public class CompletionServiceImpl implements CompletionService {
     @Override
     public Call create(MirokuRequest mirokuRequest, String id) {
         // 倘若调用了不存在的模型，则返回 null
-        if (modelService.getModels().parallelStream().noneMatch(
+        if (modelService.getModelList().parallelStream().noneMatch(
                 model -> model.getId().equals(mirokuRequest.getModel())
             )) {
             return null;

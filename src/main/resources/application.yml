@@ -6,13 +6,25 @@ spring:
   # 数据源
   datasource:
     # 数据库连接地址
-    url: jdbc:mysql://localhost:3306/miroku_api
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:miroku_api}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     # 数据库用户名 从环境变量导入
-    username: ${MYSQL_USERNAME:}
+    username: ${MYSQL_USERNAME:root}
     # 数据库密码 从环境变量导入
-    password: ${MYSQL_PASSWORD:}
+    password: ${MYSQL_PASSWORD:1234}
     # 数据库驱动
     driver-class-name: com.mysql.cj.jdbc.Driver
+  # 数据库插件 用于自动建表
+  flyway:
+    # 开启 Flyway
+    enabled: true
+    # SQL 脚本存放路径
+    locations: classpath:db/migration
+    # 兼容已有数据的旧库，自动打基线不报错
+    baseline-on-migrate: true
+    # 启动时校验脚本是否被意外修改
+    validate-on-migrate: true
+    # 记录执行历史的表名（默认值，可省略）
+    table: flyway_schema_history
 
 # MyBatis 配置
 mybatis:

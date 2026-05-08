@@ -10,8 +10,6 @@ import java.util.List;
  * /model 的回复响应
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class ModelResponse {
     /**
      * 类型：列表

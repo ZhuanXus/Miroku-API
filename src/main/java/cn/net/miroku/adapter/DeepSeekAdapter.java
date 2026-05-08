@@ -1,6 +1,6 @@
 package cn.net.miroku.adapter;
 
-import cn.net.miroku.configuration.llm.config.Deepseek;
+import cn.net.miroku.configuration.model.Deepseek;
 import cn.net.miroku.dto.completion.MirokuRequest;
 import cn.net.miroku.tool.JsonUtils;
 import okhttp3.*;

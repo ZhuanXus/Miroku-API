@@ -16,6 +16,9 @@ public class ModelController {
 
     @GetMapping("/v1/models")
     public ModelResponse getModels() {
-        return new ModelResponse("list", modelService.getModels());
+        ModelResponse response = new ModelResponse();
+        response.setObject("list");
+        response.setData(modelService.getModelList());
+        return response;
     }
 }
