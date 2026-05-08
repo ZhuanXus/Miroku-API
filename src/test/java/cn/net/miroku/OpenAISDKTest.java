@@ -1,17 +1,21 @@
 package cn.net.miroku;
 
+import cn.net.miroku.tool.JsonUtils;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.http.StreamResponse;
 import com.openai.models.chat.completions.ChatCompletion;
 import com.openai.models.chat.completions.ChatCompletionChunk;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import okhttp3.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import tools.jackson.databind.JsonNode;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,29 +31,48 @@ public class OpenAISDKTest {
     // 注入随机端口
     @LocalServerPort
     private int randomPort;
+    @Autowired
+    private OkHttpClient okHttpClient;
     private OpenAIClient client;
 
     @BeforeEach
     public void setUp() {
         String baseUrl = "http://localhost:" + randomPort + "/v1";
+        String apiKey = getApiKey();
+
         client = OpenAIOkHttpClient.builder()
                 .baseUrl(baseUrl)
-                .apiKey("sk")
                 // 30秒超时
                 .timeout(Duration.ofSeconds(30))
+                .apiKey(apiKey)
                 .build();
         System.out.println("initialization is successful.\n baseUrl: " + baseUrl);
+    }
+
+    public String getApiKey() {
+        Request req = new Request.Builder()
+                .url("http://localhost:" + randomPort + "/login")
+                .post(RequestBody.create(new byte[0], MediaType.get("application/json")))
+                .build();
+        try (Response resp = okHttpClient.newCall(req).execute()) {
+            assert resp.body() != null;
+            JsonNode json = JsonUtils.toJsonNode(resp.body().string());
+            return json.path("data").path("tokenValue").asString();
+        } catch (Exception e) {
+            throw new RuntimeException("登录失败", e);
+        }
     }
 
     @DisplayName("测试非流式聊天补全")
     @ParameterizedTest(name = "{0}")
     @ValueSource(strings = {"deepseek-chat", "doubao-seed-2-0-mini-260215",
-            "doubao-1-5-pro-32k-250115"})
+            "doubao-1-5-pro-32k-250115", "qwen3.6-flash"})
     public void testCompletion(String model) {
         ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
                 .addUserMessage("Please introduce yourself in Chinese")
                 .model(model)
                 .build();
+
         assertDoesNotThrow(() -> {
             ChatCompletion completion = client.chat().completions().create(params);
 
@@ -67,7 +90,7 @@ public class OpenAISDKTest {
     @DisplayName("测试流式聊天补全")
     @ParameterizedTest(name = "{0}")
     @ValueSource(strings = {"deepseek-chat", "doubao-seed-2-0-mini-260215",
-            "doubao-1-5-pro-32k-250115"})
+            "doubao-1-5-pro-32k-250115", "qwen3.6-flash"})
     public void testCompletionStream(String model) {
         ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
                 .addUserMessage("""

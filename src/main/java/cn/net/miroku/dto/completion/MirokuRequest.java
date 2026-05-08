@@ -17,7 +17,7 @@ public class MirokuRequest {
     /**
      * 采样温度 越高越随机
      */
-    private Double temperature;
+    private Double temperature = 1.0;
     /**
      * 是否开启流式传输
      */

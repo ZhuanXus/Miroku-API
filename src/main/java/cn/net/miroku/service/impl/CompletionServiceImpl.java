@@ -32,7 +32,6 @@ public class CompletionServiceImpl implements CompletionService {
             return null;
         }
 
-
         for (LlmAdapter strategy : llmStrategies) {
             if (strategy.support(mirokuRequest.getModel())) {
                 Call call = strategy.createChatCompletion(mirokuRequest);
