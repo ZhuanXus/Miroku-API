@@ -84,6 +84,17 @@
             <version>4.34.0</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Flyway 核心 用于自动建表 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
+        </dependency>
+        <!-- MySQL 8+ 驱动必须单独引入，Spring Boot 4 默认不包含 DB 专用方言包 -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
