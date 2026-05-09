@@ -12,9 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import tools.jackson.databind.JsonNode;
 
 import java.time.Duration;
@@ -24,49 +21,70 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.assertj.core.api.Assertions.assertThat;
 
-// 集成测试 在随机端口启动服务
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DisplayName("OpenAISDK集成测试")
-public class OpenAISDKTest {
-    // 注入随机端口
-    @LocalServerPort
-    private int randomPort;
-    @Autowired
+// ✅ 移除 @SpringBootTest，变成纯 Java 测试类
+@DisplayName("OpenAISDK 外部集成测试（Docker 环境）")
+public class OpenAISDKExternalTest {
+
+    // ✅ 固定地址，不再注入端口
+    private static final String BASE_URL = "http://127.0.0.1:8080/v1";
+    private static final String LOGIN_URL = "http://127.0.0.1:8080/login";
+
     private OkHttpClient okHttpClient;
     private OpenAIClient client;
 
     @BeforeEach
     public void setUp() {
-        String baseUrl = "http://localhost:" + randomPort + "/v1";
+        okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .readTimeout(Duration.ofSeconds(30))
+                .writeTimeout(Duration.ofSeconds(10))
+                .connectionPool(new ConnectionPool(16, 5, java.util.concurrent.TimeUnit.MINUTES))
+                .build();
+
         String apiKey = getApiKey();
 
         client = OpenAIOkHttpClient.builder()
-                .baseUrl(baseUrl)
-                // 30秒超时
+                .baseUrl(BASE_URL)
                 .timeout(Duration.ofSeconds(30))
                 .apiKey(apiKey)
                 .build();
-        System.out.println("initialization is successful.\n baseUrl: " + baseUrl);
+
+        System.out.println("✅ 初始化成功 | baseUrl: " + BASE_URL);
     }
 
-    public String getApiKey() {
+    /**
+     * 通过 /login 接口获取 API Token（模拟真实调用流程）
+     */
+    private String getApiKey() {
         Request req = new Request.Builder()
-                .url("http://localhost:" + randomPort + "/login")
+                .url(LOGIN_URL)
                 .post(RequestBody.create(new byte[0], MediaType.get("application/json")))
                 .build();
+
         try (Response resp = okHttpClient.newCall(req).execute()) {
+            if (!resp.isSuccessful()) {
+                throw new RuntimeException("登录请求失败: " + resp.code());
+            }
             assert resp.body() != null;
             JsonNode json = JsonUtils.toJsonNode(resp.body().string());
-            return json.path("data").path("tokenValue").asString();
+            String token = json.path("data").path("tokenValue").asString();
+            if (token == null || token.isEmpty()) {
+                throw new RuntimeException("获取 token 失败: " + json.toPrettyString());
+            }
+            return token;
         } catch (Exception e) {
-            throw new RuntimeException("登录失败", e);
+            throw new RuntimeException("登录流程异常", e);
         }
     }
 
     @DisplayName("测试非流式聊天补全")
     @ParameterizedTest(name = "{0}")
-    @ValueSource(strings = {"deepseek-chat", "doubao-seed-2-0-mini-260215",
-            "doubao-1-5-pro-32k-250115", "qwen3.6-flash"})
+    @ValueSource(strings = {
+            "deepseek-chat",
+            "doubao-seed-2-0-mini-260215",
+            "doubao-1-5-pro-32k-250115",
+            "qwen3.6-flash"
+    })
     public void testCompletion(String model) {
         ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
                 .addUserMessage("Please introduce yourself in Chinese")
@@ -81,50 +99,57 @@ public class OpenAISDKTest {
             assertThat(completion.choices()).hasSize(1);
             assertThat(completion.choices().getFirst().message().content()).isNotEmpty();
 
-            System.out.println("\n\nid: " + completion.id());
-            System.out.println("content: " + completion.choices().getFirst().message().content());
-            System.out.println("\n");
-        }, "模型：" + model + "解析出错");
+            System.out.println("\n📦 非流式响应 | model: " + model);
+            System.out.println("   id: " + completion.id());
+            System.out.println("   content: " + completion.choices().getFirst().message().content());
+            System.out.println();
+        }, "模型 [" + model + "] 非流式调用异常");
     }
 
     @DisplayName("测试流式聊天补全")
     @ParameterizedTest(name = "{0}")
-    @ValueSource(strings = {"deepseek-chat", "doubao-seed-2-0-mini-260215",
-            "doubao-1-5-pro-32k-250115", "qwen3.6-flash"})
+    @ValueSource(strings = {
+            "deepseek-chat",
+            "doubao-seed-2-0-mini-260215",
+            "doubao-1-5-pro-32k-250115",
+            "qwen3.6-flash"
+    })
     public void testCompletionStream(String model) {
         ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-                .addUserMessage("""
-                    Please introduce Ultraman Orb in Chinese in a few short sentences
-                    """)
+                .addUserMessage("Please introduce Ultraman Orb in Chinese in a few short sentences")
                 .model(model)
                 .build();
 
         assertDoesNotThrow(() -> {
-            try (StreamResponse<ChatCompletionChunk> streamResponse = client.chat().completions().createStreaming(params)){
+            try (StreamResponse<ChatCompletionChunk> streamResponse =
+                         client.chat().completions().createStreaming(params)) {
+
                 AtomicReference<String> id = new AtomicReference<>();
                 AtomicInteger chunkCount = new AtomicInteger(0);
                 StringBuilder content = new StringBuilder();
 
                 streamResponse.stream().forEach(chunk -> {
-                    // chunkCount++
-                    chunkCount.getAndIncrement();
-
-                    if (chunkCount.get() == 1) {
+                    int count = chunkCount.getAndIncrement();
+                    if (count == 0) {
                         id.set(chunk.id());
                     }
                     content.append(chunk.choices().getFirst().delta().content().orElse(""));
                 });
-                String result = content.toString();
 
-                assertThat(id.toString()).isNotEmpty().startsWith("").startsWith("Miroku");
+                String result = content.toString();
+                String finalId = id.get();
+
+                assertThat(finalId).isNotEmpty().startsWith("Miroku");
                 assertThat(result).isNotEmpty();
                 assertThat(chunkCount.get()).isGreaterThan(0);
 
-                System.out.println("\n\nid: " + id);
-                System.out.println("content: " + result);
-                System.out.println("chunkCount: " + chunkCount);
-                System.out.println("\n");
+                System.out.println("\n🌊 流式响应 | model: " + model);
+                System.out.println("   id: " + finalId);
+                System.out.println("   content: " + result.replaceAll("\n", "\n   "));
+                System.out.println("   chunks: " + chunkCount.get());
+                System.out.println();
+
             }
-        }, "模型：" + model + "解析出错");
+        }, "模型 [" + model + "] 流式调用异常");
     }
 }
