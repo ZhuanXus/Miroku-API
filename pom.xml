@@ -148,6 +148,9 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <!-- 设定构建文件名-->
+        <finalName>miroku-api</finalName>
     </build>
 
 </project>

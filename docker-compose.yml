@@ -7,11 +7,11 @@ services:
 
     # 环境变量（值会从 .env 文件自动注入）
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${MYSQL_USERNAME}
+      MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      TZ: Asia/Shanghai  # 数据库时区对齐
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Shanghai # 数据库时区对齐
 
     # 端口映射（本地开发时可访问，生产环境建议注释掉或改端口）
     ports:
@@ -60,8 +60,9 @@ services:
       DB_HOST: db
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
-      MYSQL_USERNAME: ${MYSQL_USERNAME}
+      MYSQL_USERNAME: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      SERVER_ADDRESS: 0.0.0.0
 
       # 🤖 AI 模型 API Key（透传给 Spring Boot）
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
@@ -83,7 +84,7 @@ services:
 
     # 健康检查（可选，需引入 spring-boot-starter-actuator）
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/login || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
